@@ -1,0 +1,248 @@
+<html><head></head><body><div class="apidocDiv">
+<style>
+/*csslint
+*/
+.apidocDiv {
+    background: #fff;
+    font-family: Arial, Helvetica, sans-serif;
+}
+.apidocDiv a[href] {
+    color: #33f;
+    font-weight: bold;
+    text-decoration: none;
+}
+.apidocDiv a[href]:hover {
+    text-decoration: underline;
+}
+.apidocCodeCommentSpan {
+    background: #bbf;
+    color: #000;
+    display: block;
+}
+.apidocCodeKeywordSpan {
+    color: #d00;
+    font-weight: bold;
+}
+.apidocCodePre {
+    background: #eef;
+    border: 1px solid;
+    color: #777;
+    padding: 5px;
+    white-space: pre-wrap;
+}
+.apidocFooterDiv {
+    margin-top: 20px;
+    text-align: center;
+}
+.apidocModuleLi {
+    margin-top: 10px;
+}
+.apidocSectionDiv {
+    border-top: 1px solid;
+    margin-top: 20px;
+}
+.apidocSignatureSpan {
+    color: #777;
+    font-weight: bold;
+}
+</style>
+<h1>api documentation for
+    <a href="https://github.com/devinivy/bedwetter">bedwetter (v1.8.2)</a>
+</h1>
+<h4>Auto-generated, RESTful, CRUDdy route handlers for Waterline models in hapi</h4>
+<div class="apidocSectionDiv"><a href="#apidoc.tableOfContents" id="apidoc.tableOfContents"><h1>table of contents</h1></a><ol>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.bedwetter">module bedwetter</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.bedwetter.register">
+            function <span class="apidocSignatureSpan">bedwetter.</span>register
+            <span class="apidocSignatureSpan">(server, options, next)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <span class="apidocSignatureSpan">object <span class="apidocSignatureSpan">bedwetter.</span>generalUtil</span>
+
+        </li>
+
+    </ol></li>
+
+    <li class="apidocModuleLi"><a href="#apidoc.module.bedwetter.generalUtil">module bedwetter.generalUtil</a><ol>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.bedwetter.generalUtil.applyOptionsHook">
+            function <span class="apidocSignatureSpan">bedwetter.generalUtil.</span>applyOptionsHook
+            <span class="apidocSignatureSpan">(request, origOptions)</span>
+            </a>
+
+        </li>
+
+        <li>
+
+            <a class="apidocElementLiA" href="#apidoc.element.bedwetter.generalUtil.pkToString">
+            function <span class="apidocSignatureSpan">bedwetter.generalUtil.</span>pkToString
+            <span class="apidocSignatureSpan">(pk)</span>
+            </a>
+
+        </li>
+
+    </ol></li>
+
+</ol></div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.bedwetter" id="apidoc.module.bedwetter">module bedwetter</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.bedwetter.register" id="apidoc.element.bedwetter.register">
+        function <span class="apidocSignatureSpan">bedwetter.</span>register
+        <span class="apidocSignatureSpan">(server, options, next)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">register = function (server, options, next) {
+
+    server.dependency('dogwater');
+
+    server.handler('bedwetter', function(route, handlerOptions) {
+
+        // handlerOptions come user-defined in route definition
+        // nothing should override these!
+
+        var Dogwater = server.plugins.dogwater;
+
+        var thisRouteOpts = _.cloneDeep(internals.defaults);
+
+        // Plugin-level user-defined options
+        _.merge(thisRouteOpts, options)
+
+        // Route-level user-defined options
+        _.merge(thisRouteOpts, handlerOptions);
+
+        // Route-level info (should not override plugin options &amp; handler options)
+        internals.setOptionsFromRouteInfo(route, thisRouteOpts);
+
+        // Set associations now that the model is locked-down
+        // TODO: figure out why these don't stick when model grabbed from parseModel
+        var Model = Dogwater[thisRouteOpts.model];
+
+        Hoek.assert(Model, 'Model `' + thisRouteOpts.model + '` must exist to build route.');
+
+        // Don't overwrite associations if they've been set as an option for some reason
+        _.defaults(thisRouteOpts, {associations: internals.getAssociationsFromModel(Model)});
+
+        thisRouteOpts = internals.normalizeOptions(thisRouteOpts);
+
+        // Here's our little bed wetter!
+        var bedWetter = internals.determineBedWetter(route, thisRouteOpts);
+
+        return bedWetter(route, thisRouteOpts);
+
+    });
+
+    next();
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">n/a</pre></li>
+    </ul>
+
+
+
+
+</div>
+
+<div class="apidocSectionDiv">
+<h1><a href="#apidoc.module.bedwetter.generalUtil" id="apidoc.module.bedwetter.generalUtil">module bedwetter.generalUtil</a></h1>
+
+
+    <h2>
+        <a href="#apidoc.element.bedwetter.generalUtil.applyOptionsHook" id="apidoc.element.bedwetter.generalUtil.applyOptionsHook">
+        function <span class="apidocSignatureSpan">bedwetter.generalUtil.</span>applyOptionsHook
+        <span class="apidocSignatureSpan">(request, origOptions)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">applyOptionsHook = function (request, origOptions) {
+
+    if (origOptions.hooks &amp;&amp; typeof origOptions.hooks.options === "function") {
+
+        return origOptions.hooks.options(_.cloneDeep(origOptions), request);
+    } else {
+
+        return _.cloneDeep(origOptions);
+    }
+
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+ */
+
+module.exports = function addToCollection (route, origOptions) {
+
+return function (request, reply) {
+
+  // Transform the original options using options hook
+  var options = GeneralUtil.<span class="apidocCodeKeywordSpan">applyOptionsHook</span>(request, origOptions);
+
+  var RequestState = request.plugins.bedwetter = {
+    action: 'add',
+    options: options
+  };
+
+  var actionUtil = require('../actionUtil')(request, options);
+...</pre></li>
+    </ul>
+
+
+
+    <h2>
+        <a href="#apidoc.element.bedwetter.generalUtil.pkToString" id="apidoc.element.bedwetter.generalUtil.pkToString">
+        function <span class="apidocSignatureSpan">bedwetter.generalUtil.</span>pkToString
+        <span class="apidocSignatureSpan">(pk)</span>
+        </a>
+    </h2>
+    <ul>
+    <li>description and source-code<pre class="apidocCodePre">pkToString = function (pk) {
+
+    if (_.isObject(pk) &amp;&amp; Object.keys(pk).length) {
+
+        return String(pk[Object.keys(pk)[0]]);
+    } else {
+
+        return String(pk);
+    }
+}</pre></li>
+    <li>example usage<pre class="apidocCodePre">...
+if (!matchingRecord)
+  return reply(Boom.notFound('No record found with the specified id.'));
+
+if (!actionUtil.validOwnership(matchingRecord, false))
+  return reply(Boom.unauthorized());
+
+if (!matchingRecord[relation])
+  return reply(Boom.notFound(util.format('Specified record (%s) is missing relation `%s`', GeneralUtil.<span class="apidocCodeKeywordSpan
+">pkToString</span>(parentPk), relation)));
+
+// Share primary record
+RequestState.primaryRecord = matchingRecord;
+
+// If looking for a particular relation, return that it exists or that it does not.
+// Otherwise, just return the results.
+if (childPk) {
+...</pre></li>
+    </ul>
+
+
+</div>
+
+<div class="apidocFooterDiv">
+    [ this document was created with
+    <a href="https://github.com/kaizhu256/node-utility2" target="_blank">utility2</a>
+    ]
+</div>
+</div>
+</body></html>
